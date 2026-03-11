@@ -1,0 +1,117 @@
+# AI VTuber 캐릭터 설정
+# MotionPNGTuber 기반 커스텀 립싱크 시스템
+
+character:
+  name: "AI VTuber"        # 캐릭터 이름
+  language: "ko"           # 언어 (ko: 한국어, ja: 일본어, en: 영어)
+
+  # 캐릭터 영상 파일 경로
+  videos:
+    idle: "assets/character/idle.mp4"        # 기본 대기 영상 (루프)
+    talking: "assets/character/talking.mp4"  # 말하기 영상 (없으면 idle 사용)
+
+  # 입 스프라이트 폴더 (MotionPNGTuber 형식)
+  # 각 감정 폴더 안에: open.png, closed.png, half.png, u.png, e.png
+  mouth_sprites_base: "assets/mouth"
+
+  # AI 캐릭터 페르소나 (시스템 프롬프트)
+  persona: |
+    당신은 친근하고 귀여운 AI VTuber입니다.
+    항상 한국어로 대화하며, 밝고 활기차게 소통합니다.
+    시청자의 채팅에 재미있고 자연스럽게 반응합니다.
+    응답은 2~3문장 이내로 간결하게 합니다.
+
+# AI 응답 엔진 설정
+ai:
+  provider: "openai"       # openai | anthropic
+  model: "gpt-4o-mini"    # 사용할 모델
+  api_key: ""              # 빈 문자열 → 환경변수 OPENAI_API_KEY 사용
+  # anthropic_api_key: "" # Anthropic 사용 시 → ANTHROPIC_API_KEY
+
+  # 응답 길이 제한
+  max_tokens: 150
+  temperature: 0.8
+
+# TTS (Text-to-Speech) 설정
+tts:
+  provider: "edge-tts"     # edge-tts (무료) | google (Google Cloud TTS)
+
+  # edge-tts 사용 시
+  edge_tts:
+    voice: "ko-KR-SunHiNeural"    # 한국어 여성 목소리
+    # 다른 옵션: ko-KR-InJoonNeural (남성), ko-KR-HyunsuNeural
+    rate: "+0%"                    # 속도 (-50% ~ +100%)
+    pitch: "+0Hz"                  # 피치
+    volume: "+0%"                  # 볼륨
+
+  # Google Cloud TTS 사용 시 (edge-tts보다 품질 우수)
+  google:
+    credentials: ""        # 서비스 계정 JSON 경로 → 환경변수 GOOGLE_APPLICATION_CREDENTIALS
+    voice_name: "ko-KR-Wavenet-A"
+    speaking_rate: 1.0
+    pitch: 0.0
+
+# 립싱크 설정 (MotionPNGTuber 파라미터)
+lipsync:
+  motionpngtuber_path: "./MotionPNGTuber"  # MotionPNGTuber 클론 경로
+  render_fps: 30                            # 렌더링 FPS
+  silence_gate: 0.002                       # 무음 판정 임계값
+  talk_threshold: 0.010                     # 말하기 감지 임계값
+  half_threshold: 0.025                     # 입 반쯤 벌리기 임계값
+  open_threshold: 0.055                     # 입 완전히 벌리기 임계값
+
+  # 오디오 설정
+  audio:
+    samplerate: 24000      # TTS 출력 샘플레이트
+    hop_ms: 10             # 오디오 처리 간격 (ms)
+
+  # 출력 설정
+  output:
+    preview_window: true   # 미리보기 창 표시
+    virtual_cam: false     # 가상 카메라 출력 (OBS용, pyvirtualcam 필요)
+    window_title: "AI VTuber"
+    window_size: [1280, 720]
+
+# 감정 시스템 설정
+emotion:
+  enabled: true
+  default: "neutral"       # 기본 감정
+
+  # AI 응답 텍스트 → 감정 레이블 매핑
+  # 각 감정에 대한 키워드 목록 (텍스트에서 감지)
+  keywords:
+    happy:     ["ㅋㅋ", "ㅎㅎ", "😊", "😄", "재미있", "좋아", "신나", "행복", "기뻐", "와!", "대박"]
+    sad:       ["슬프", "속상", "😢", "😭", "아쉬워", "우울", "힘들", "걱정"]
+    angry:     ["화가", "짜증", "😠", "😤", "열받", "싫어"]
+    surprised: ["헉", "와", "진짜?", "😲", "😮", "놀라", "대박", "세상에"]
+    excited:   ["신나", "흥분", "🎉", "🎊", "최고", "굉장", "와우", "야호"]
+    neutral:   []  # 기본값
+
+  # 감정별 MotionPNGTuber 폴더 이름 (assets/mouth/ 하위)
+  mouth_dir_mapping:
+    happy:     "happy"
+    sad:       "sad"
+    angry:     "angry"
+    surprised: "surprised"
+    excited:   "happy"    # excited → happy 폴더 재사용
+    neutral:   "neutral"
+
+# 스트리밍 연동 설정 (선택사항)
+streaming:
+  # TikTok Live 채팅 읽기
+  tiktok:
+    enabled: false
+    username: ""           # TikTok 사용자명
+
+  # OBS WebSocket 연동
+  obs:
+    enabled: false
+    host: "localhost"
+    port: 4455
+    password: ""
+
+  # YouTube Live 채팅 읽기
+  youtube:
+    enabled: false
+    api_key: ""
+    video_id: ""

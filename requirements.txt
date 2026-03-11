@@ -1,0 +1,27 @@
+# AI VTuber - Python 의존성
+# pip install -r requirements.txt
+
+# ── AI 엔진 ──────────────────────────────────────
+openai>=1.0.0               # OpenAI API (GPT-4, gpt-4o-mini 등)
+anthropic>=0.25.0           # Anthropic API (선택사항)
+
+# ── TTS ──────────────────────────────────────────
+edge-tts>=6.1.9             # Microsoft Edge TTS (무료, 기본값)
+# google-cloud-texttospeech  # Google Cloud TTS (선택사항, 고품질)
+
+# ── 오디오 처리 ──────────────────────────────────
+sounddevice>=0.4.6          # 오디오 재생 및 입력
+soundfile>=0.12.1           # 오디오 파일 읽기/쓰기
+numpy>=1.24.0,<2.0.0        # 수치 연산
+
+# ── 영상/이미지 처리 ─────────────────────────────
+opencv-python>=4.8.0        # 영상 처리 (MotionPNGTuber 핵심)
+Pillow>=10.0.0              # 이미지 처리
+
+# ── 설정 ─────────────────────────────────────────
+PyYAML>=6.0                 # YAML 설정 파일 파싱
+
+# ── 선택사항 ─────────────────────────────────────
+# pyvirtualcam              # OBS 가상 카메라 출력 (config에서 virtual_cam: true 시)
+# TikTokLive               # TikTok Live 채팅 연동 (--tiktok 옵션 시)
+# pydub                    # MP3 디코딩 대안 (soundfile 실패 시)
