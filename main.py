@@ -126,7 +126,7 @@ async def main():
         if args.speak:
             # 단일 발화 모드
             await controller.speak_text(args.speak)
-            import time; time.sleep(5)  # 발화 완료 대기
+            await asyncio.sleep(5)  # 발화 완료 대기
         elif args.tiktok:
             await run_tiktok(controller, args.tiktok)
         else:

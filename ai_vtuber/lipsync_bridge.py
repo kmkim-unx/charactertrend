@@ -231,13 +231,16 @@ class LipsyncBridge:
             return "closed"
         if rms < p["half_threshold"]:
             return "half"
-        # 모음 구분 (centroid 기반)
+        # 모음 구분 (centroid 기반, 한국어 음성 특성 기준)
+        # sr=24000 기준: 나이퀴스트 12000Hz
+        # "ㅜ/ㅗ" 발음: centroid < 1200Hz (norm < 0.10)
+        # "ㅔ/ㅣ" 발음: centroid > 2500Hz (norm > 0.21)
         norm_sr = self._audio_sr / 2
         if norm_sr > 0:
             norm_c = centroid / norm_sr
-            if norm_c < 0.15:   # 저주파 → "u" (ㅜ 발음)
+            if norm_c < 0.10:   # 저주파 → "u" (ㅜ/ㅗ 발음)
                 return "u"
-            if norm_c > 0.55:   # 고주파 → "e" (ㅔ/ㅣ 발음)
+            if norm_c > 0.21:   # 고주파 → "e" (ㅔ/ㅣ 발음)
                 return "e"
         if rms < p["open_threshold"]:
             return "half"
