@@ -59,23 +59,39 @@ class AIEngine:
     async def _openai_chat(self) -> str:
         messages = [{"role": "system", "content": self.persona}] + self._history[:-1]
         messages.append(self._history[-1])
-
-        resp = await self._client.chat.completions.create(
-            model=self.model,
-            messages=messages,
-            max_tokens=self.max_tokens,
-            temperature=self.temperature,
-        )
-        return resp.choices[0].message.content.strip()
+        try:
+            resp = await self._client.chat.completions.create(
+                model=self.model,
+                messages=messages,
+                max_tokens=self.max_tokens,
+                temperature=self.temperature,
+            )
+            return resp.choices[0].message.content.strip()
+        except Exception as e:
+            err = str(e)
+            if "429" in err or "quota" in err.lower() or "rate_limit" in err.lower():
+                msg = "API 크레딧이 부족해요. OpenAI 계정에서 결제 정보를 확인해 주세요!"
+                logger.warning(f"OpenAI 429/quota: {e}")
+                return msg
+            logger.error(f"OpenAI API 오류: {e}")
+            return "잠깐, 서버 연결에 문제가 생겼어요. 잠시 후 다시 시도해 주세요."
 
     async def _anthropic_chat(self) -> str:
-        resp = await self._client.messages.create(
-            model=self.model,
-            system=self.persona,
-            messages=self._history[:-1] + [self._history[-1]],
-            max_tokens=self.max_tokens,
-        )
-        return resp.content[0].text.strip()
+        try:
+            resp = await self._client.messages.create(
+                model=self.model,
+                system=self.persona,
+                messages=self._history[:-1] + [self._history[-1]],
+                max_tokens=self.max_tokens,
+            )
+            return resp.content[0].text.strip()
+        except Exception as e:
+            err = str(e)
+            if "429" in err or "quota" in err.lower() or "rate_limit" in err.lower():
+                logger.warning(f"Anthropic 429/quota: {e}")
+                return "API 크레딧이 부족해요. Anthropic 계정을 확인해 주세요!"
+            logger.error(f"Anthropic API 오류: {e}")
+            return "잠깐, 서버 연결에 문제가 생겼어요. 잠시 후 다시 시도해 주세요."
 
     async def stream_chat(self, user_message: str) -> AsyncGenerator[str, None]:
         """스트리밍 방식으로 AI 응답을 생성합니다 (첫 청크가 빨리 나옴)."""

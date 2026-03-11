@@ -31,13 +31,11 @@ class VTuberController:
         self._speaking_lock = asyncio.Lock()
 
     def start(self):
-        """렌더 루프를 시작합니다."""
-        self.bridge.start()
+        """컨트롤러를 시작합니다. 브리지 렌더는 main.py의 메인 스레드가 담당합니다."""
         logger.info("VTuber 컨트롤러 시작됨")
 
     def stop(self):
-        """모든 컴포넌트를 정지합니다."""
-        self.bridge.stop()
+        """컴포넌트를 정지합니다. 브리지는 main.py에서 별도로 정지합니다."""
         logger.info("VTuber 컨트롤러 정지됨")
 
     async def respond(self, user_message: str) -> str:
