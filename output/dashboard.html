@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>UNX Character Tracker Dashboard</title>
+  <style>
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Segoe UI', 'Noto Sans KR', sans-serif;
+  background: #0f0f1a;
+  color: #e2e8f0;
+  min-height: 100vh;
+}
+a { color: inherit; text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* Header */
+.header {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border-bottom: 1px solid #2d3748;
+  padding: 24px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.header h1 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  background: linear-gradient(90deg, #a78bfa, #60a5fa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.header-meta { font-size: 0.82rem; color: #94a3b8; text-align: right; line-height: 1.6; }
+.source-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.source-tag { font-size: 0.72rem; padding: 2px 8px; border-radius: 12px; font-weight: 600; }
+
+/* Section */
+.section { padding: 32px; max-width: 1400px; margin: 0 auto; }
+.section-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #a78bfa;
+  margin-bottom: 20px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #2d3748;
+  letter-spacing: 0.05em;
+}
+
+/* Card grid */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+/* Card */
+.card {
+  background: #1a1a2e;
+  border: 1px solid #2d3748;
+  border-radius: 14px;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(167, 139, 250, 0.15);
+}
+.card-image {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: #0f0f1a;
+  overflow: hidden;
+}
+.card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.rank-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(0,0,0,0.75);
+  color: #fbbf24;
+  font-size: 0.9rem;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 20px;
+  border: 1px solid #fbbf24;
+  backdrop-filter: blur(4px);
+}
+.source-badge {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 10px;
+  color: #fff;
+  backdrop-filter: blur(4px);
+}
+.card-body { padding: 14px 16px 16px; }
+.char-name {
+  display: block;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #e2e8f0;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.total-score { font-size: 0.8rem; color: #94a3b8; margin-bottom: 10px; }
+.total-score strong { color: #fbbf24; font-size: 1rem; }
+
+/* Score bars */
+.scores { margin-bottom: 10px; }
+.score-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 5px;
+}
+.score-label { font-size: 0.68rem; color: #94a3b8; width: 56px; flex-shrink: 0; }
+.score-bar-bg {
+  flex: 1;
+  height: 6px;
+  background: #2d3748;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.score-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.6s ease;
+}
+.score-val { font-size: 0.72rem; color: #cbd5e1; width: 16px; text-align: right; flex-shrink: 0; }
+
+/* Reason details */
+.reason-details {
+  margin-top: 8px;
+  font-size: 0.78rem;
+}
+.reason-details summary {
+  color: #94a3b8;
+  cursor: pointer;
+  user-select: none;
+  padding: 2px 0;
+}
+.reason-details summary:hover { color: #e2e8f0; }
+.reason-text {
+  color: #cbd5e1;
+  line-height: 1.6;
+  margin-top: 6px;
+  padding: 8px;
+  background: #0f0f1a;
+  border-radius: 6px;
+  border-left: 2px solid #a78bfa;
+}
+
+/* UNX fit */
+.unx-fit {
+  margin-top: 8px;
+  font-size: 0.78rem;
+  color: #34d399;
+  background: rgba(52, 211, 153, 0.08);
+  border: 1px solid rgba(52, 211, 153, 0.2);
+  border-radius: 6px;
+  padding: 6px 10px;
+  line-height: 1.5;
+}
+
+/* All chars table */
+.table-wrap {
+  overflow-x: auto;
+  border-radius: 10px;
+  border: 1px solid #2d3748;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+th {
+  background: #1a1a2e;
+  color: #94a3b8;
+  font-weight: 600;
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 1px solid #2d3748;
+  white-space: nowrap;
+}
+td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #1e293b;
+  vertical-align: top;
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: #1a1a2e; }
+.col-num { color: #64748b; width: 36px; }
+.col-name { font-weight: 600; color: #e2e8f0; }
+.col-desc { color: #94a3b8; max-width: 260px; }
+.col-tags { color: #7dd3fc; max-width: 160px; }
+.tag {
+  display: inline-block;
+  font-size: 0.68rem;
+  padding: 2px 7px;
+  border-radius: 10px;
+  color: #fff;
+  font-weight: 600;
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  padding: 20px;
+  font-size: 0.78rem;
+  color: #475569;
+  border-top: 1px solid #1e293b;
+  margin-top: 16px;
+}
+
+/* All chars details */
+.all-chars-details summary {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #a78bfa;
+  cursor: pointer;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #2d3748;
+  letter-spacing: 0.05em;
+  user-select: none;
+}
+.all-chars-details summary:hover { color: #c4b5fd; }
+.all-chars-details[open] .table-wrap { margin-top: 16px; }
+
+@media (max-width: 600px) {
+  .section { padding: 16px; }
+  .card-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+  .header { padding: 16px; }
+}
+@media (max-width: 400px) {
+  .card-grid { grid-template-columns: 1fr; }
+}
+
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <div>
+    <h1>UNX Character Tracker</h1>
+    <div class="source-tags"><span class="source-tag" style="background:#6b7280;">rofan</span><span class="source-tag" style="background:#dc2626;">Crack AI</span><span class="source-tag" style="background:#7c3aed;">Zeta AI</span></div>
+  </div>
+  <div class="header-meta">
+    <div>수집 캐릭터 <strong>41</strong>개 &nbsp;|&nbsp; Top-5 선정</div>
+    <div>생성: 2026-03-31 11:56:46</div>
+  </div>
+</header>
+
+<main>
+  <section class="section">
+    <div class="section-title">TOP 5 추천 캐릭터</div>
+    <div class="card-grid">
+      
+    <div class="card">
+      <div class="card-image">
+        <img src="https://image.zeta-ai.io/og-image-ko.png" alt="4
+12.8만" loading="lazy" onerror="this.src=''"/>
+        <div class="rank-badge">#1</div>
+        <div class="source-badge" style="background:#7c3aed;">Zeta AI</div>
+      </div>
+      <div class="card-body">
+        <a href="https://zeta-ai.io/ko?tab=ranking" target="_blank" class="char-name">4
+12.8만</a>
+        <div class="total-score">총점 <strong>21</strong></div>
+        <div class="scores">
+        <div class="score-row">
+          <span class="score-label">G3 익숙함</span>
+          <div class="score-bar-bg">
+            <div class="score-bar-fill" style="width:60%; background:#60a5fa;"></div>
+          </div>
+          <span class="score-val">6</span>
+        </div>
+        <div class="score-row">
+          <span class="score-label">G4 신선함</span>
+          <div class="score-bar-bg">
+            <div class="score-bar-fill" style="width:80%; background:#a78bfa;"></div>
+          </div>
+          <span class="score-val">8</span>
+        </div>
+        <div class="score-row">
+          <span class="score-label">G5 트랙</span>
+          <div class="score-bar-bg">
+            <div class="score-bar-fill" style="width:70%; background:#34d399;"></div>
+          </div>
+          <span class="score-val">7</span>
+        </div>
+        </div>
+        
+        <details class="reason-details">
+          <summary>분석 이유</summary>
+          <p class="reason-text">이 캐릭터는 AI 기반의 인기 캐릭터로, 대중이 쉽게 이해할 수 있는 요소가 있지만 기존 캐릭터와의 차별성이 필요합니다. 신선한 존재 형태와 독특한 조합이 매력적이며, 장기적인 서사 가능성도 존재합니다.</p>
+        </details>
+        <div class="unx-fit">✦ AI 기반의 캐릭터로서 UNX 라이브 AI의 특성과 잘 어울립니다.</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-image">
+        <img src="https://wrtn-image-ai-character.s3.ap-northeast-2.amazonaws.com/8OEVXcBGLao-APKONU5PUjMz/bf5b145a-fe13-4441-a3d5-81586afd39fa_origin.webp" alt="루시안" loading="lazy" onerror="this.src=''"/>
+        <div class="rank-badge">#2</div>
+        <div class="source-badge" style="background:#dc2626;">Crack AI</div>
+      </div>
+      <div class="card-body">
+        <a href="https://crack.wrtn.ai/characters/69c35900c803b4297f5b2be6" target="_blank" class="char-name">루시안</a>
+        <div class="total-score">총점 <strong>21</strong></div>
+        <div class="scores">
+        <div class="score-row">
+          <span class="score-label">G3 익숙함</span>
+          <div class="score-bar-bg">
+            <div class="score-bar-fill" style="width:70%; background:#60a5fa;"></div>
+          </div>
+          <span class="score-val">7</span>
+        </div>
+        <div class="score-row">
+          <span class="score-label">G4 신선함</span>
+          <div class="score-bar-bg">
+            <div class="score-bar-fill" style="width:80%; background:#a78bfa;"></div>
+          </div>
+          <span class="score-val">8</span>
+        </div>
+        <div class="score-row">
+          <span class="score-label">G5 트랙</span>
+          <div class="score-bar-bg">
+            <div class="score-bar-fill" style="width:60%; background:#34d399;"></div>
+          </div>
+          <span class="score-val">6</span>
+        </div>
+        </div>
+        
+        <details class="reason-details">
+          <summary>분석 이유</summary>
+          <p class="reason-text">루시안은 마왕과 천사라는 익숙한 캐릭터 조합을 통해 대중이 쉽게 이해할 수 있는 요소를 가지고 있습니다. 그러나 마왕이 천사를 쫓아다니며 고백하는 설정은 신선한 차별점을 제공합니다. 장기적인 매력은 다소 부족할 수 있지만, 독특한 세계관이 팬을 끌어들일 가능성이 있습니다.</p>
+        </details>
+        <div class="unx-fit">✦ 루시안은 독특한 캐릭터 설정으로 UNX 라이브 AI에 적합하여 다양한 상호작용을 통해 팬들과의 관계를 강화할 수 있습니다.</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-image">
+        <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIj4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMTAwJSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiMwNTk2NjkiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdHlsZT0ic3RvcC1jb2xvcjojMDU5NjY5ODgiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIDxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSJ1cmwoI2cpIiByeD0iMTIiLz4KICA8dGV4dCB4PSIxMDAiIHk9IjEzMCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSI4MCIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZpbGw9IndoaXRlIiBmb250LXdlaWdodD0iYm9sZCI+7LqQPC90ZXh0Pgo8L3N2Zz4=" alt="캐릭터 AI 채팅 | 로판 AI"/>
+        <div class="rank-badge">#3</div>
+        <div class="source-badge" style="background:#6b7280;">rofan</div>
+      </div>
+      <div class="card-body">
+        <a href="https://rofan.ai/character/rofan_0" target="_blank" class="char-name">캐릭터 AI 채팅 | 로판 AI</a>
+        <div class="total-score">총점 <strong>21</strong></div>
+        <div class="scores">
+        <div class="score-row">
+          <span class="score-label">G3 익숙함</span>
+          <div class="score-bar-bg">
+            <div class="score-bar-fill" style="width:80%; background:#60a5fa;"></div>
+          </div>
+          <span class="score-val">8</span>
+        </div>
+        <div class="score-row">
+          <span class="score-label">G4 신선함</span>
+          <div class="score-bar-bg">
+            <div class="score-bar-fill" style="width:70%; background:#a78bfa;"></div>
+          </div>
+          <span class="score-val">7</span>
+        </div>
+        <div class="score-row">
+          <span class="score-label">G5 트랙</span>
+          <div class="score-bar-bg">
+            <div class="score-bar-fill" style="width:60%; background:#34d399;"></div>
+          </div>
+          <span class="score-val">6</span>
+        </div>
+        </div>
+        
+        <details class="reason-details">
+          <summary>분석 이유</summary>
+          <p class="reason-text">기존의 로맨스 장르와 감정선을 잘 참조하여 대중이 쉽게 이해할 수 있는 요소가 많습니다. 그러나 AI 캐릭터와의 대화라는 신선한 접근 방식이 있지만, 물리적으로 불가능한 존재 형태는 부족합니다. 장기적인 매력은 있지만, 특정 트렌드에 의존할 가능성이 있습니다.</p>
+        </details>
+        <div class="unx-fit">✦ AI 캐릭터와의 대화는 UNX 라이브 AI의 인터랙티브한 특성과 잘 맞아떨어집니다.</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-image">
+        <img src="https://wrtn-image-ai-character.s3.ap-northeast-2.amazonaws.com/8KvX5e7eqHK-KKKOS1A4QjdP/e62488ac-c28a-4fa2-b68f-cb018d4b6c37_origin.webp" alt="윤태진" loading="lazy" onerror="this.src=''"/>
+        <div class="rank-badge">#4</div>
+        <div class="source-badge" style="background:#dc2626;">Crack AI</div>
+      </div>
+      <div class="card-body">
+        <a href="https://crack.wrtn.ai/characters/69c35900c803b4297f5b2be2" target="_blank" class="char-name">윤태진</a>
+        <div class="total-score">총점 <strong>21</strong></div>
+        <div class="scores">
+        <div class="score-row">
+          <span class="score-label">G3 익숙함</span>
+          <div class="score-bar-bg">
+            <div class="score-bar-fill" style="width:70%; background:#60a5fa;"></div>
+          </div>
+          <span class="score-val">7</span>
+        </div>
+        <div class="score-row">
+          <span class="score-label">G4 신선함</span>
+          <div class="score-bar-bg">
+            <div class="score-bar-fill" style="width:60%; background:#a78bfa;"></div>
+          </div>
+          <span class="score-val">6</span>
+        </div>
+        <div class="score-row">
+          <span class="score-label">G5 트랙</span>
+          <div class="score-bar-bg">
+            <div class="score-bar-fill" style="width:80%; background:#34d399;"></div>
+          </div>
+          <span class="score-val">8</span>
+        </div>
+        </div>
+        
+        <details class="reason-details">
+          <summary>분석 이유</summary>
+          <p class="reason-text">윤태진은 피폐와 구원이라는 감정선을 통해 대중이 쉽게 이해할 수 있는 요소를 가지고 있습니다. 그러나 물리적으로 불가능한 존재 형태나 AI만 가능한 조합은 부족해 신선함이 다소 떨어집니다. 그럼에도 불구하고 장기적인 매력과 서사를 갖추고 있어 팬층을 형성할 가능성이 높습니다.</p>
+        </details>
+        <div class="unx-fit">✦ 윤태진은 감정적으로 깊이 있는 캐릭터로, UNX 라이브 AI의 감정 표현과 상호작용에 적합합니다.</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-image">
+        <img src="https://wrtn-image-ai-character.s3.ap-northeast-2.amazonaws.com/8Ouvi5by5kk-KKKOUkFXWjhQ/28aba775-a5fc-4640-a447-98857c3ba785_origin.webp" alt="송백화" loading="lazy" onerror="this.src=''"/>
+        <div class="rank-badge">#5</div>
+        <div class="source-badge" style="background:#dc2626;">Crack AI</div>
+      </div>
+      <div class="card-body">
+        <a href="https://crack.wrtn.ai/characters/69c35900c803b4297f5b2be4" target="_blank" class="char-name">송백화</a>
+        <div class="total-score">총점 <strong>21</strong></div>
+        <div class="scores">
+        <div class="score-row">
+          <span class="score-label">G3 익숙함</span>
+          <div class="score-bar-bg">
+            <div class="score-bar-fill" style="width:70%; background:#60a5fa;"></div>
+          </div>
+          <span class="score-val">7</span>
+        </div>
+        <div class="score-row">
+          <span class="score-label">G4 신선함</span>
+          <div class="score-bar-bg">
+            <div class="score-bar-fill" style="width:60%; background:#a78bfa;"></div>
+          </div>
+          <span class="score-val">6</span>
+        </div>
+        <div class="score-row">
+          <span class="score-label">G5 트랙</span>
+          <div class="score-bar-bg">
+            <div class="score-bar-fill" style="width:80%; background:#34d399;"></div>
+          </div>
+          <span class="score-val">8</span>
+        </div>
+        </div>
+        
+        <details class="reason-details">
+          <summary>분석 이유</summary>
+          <p class="reason-text">송백화는 로맨스 장르에서 흔히 볼 수 있는 '짝사랑'의 감정선을 가지고 있어 대중이 쉽게 이해할 수 있습니다. 그러나 '선배를 괴롭히는 후배'라는 설정은 다소 신선한 요소를 제공하며, 장기적인 서사와 매력을 갖추고 있습니다.</p>
+        </details>
+        <div class="unx-fit">✦ 이 캐릭터는 UNX 라이브 AI의 상호작용에 적합한 매력적인 요소를 가지고 있습니다.</div>
+      </div>
+    </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <details class="all-chars-details">
+      <summary>전체 수집 캐릭터 목록 (41개)</summary>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>소스</th>
+              <th>이름</th>
+              <th>설명</th>
+              <th>태그</th>
+              <th>링크</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+          <tr>
+            <td class="col-num">1</td>
+            <td><span class="tag" style="background:#7c3aed;">Zeta AI</span></td>
+            <td class="col-name">홈
+랭킹</td>
+            <td class="col-desc">Zeta AI 인기 캐릭터 (텍스트 파싱)</td>
+            <td class="col-tags"></td>
+            <td><a href="https://zeta-ai.io/ko?tab=ranking" target="_blank">링크</a></td>
+          </tr>
+
+          <tr>
+            <td class="col-num">2</td>
+            <td><span class="tag" style="background:#7c3aed;">Zeta AI</span></td>
+            <td class="col-name">홈
+랭킹</td>
+            <td class="col-desc">Zeta AI 인기 캐릭터 (텍스트 파싱)</td>
+            <td class="col-tags"></td>
+            <td><a href="https://zeta-ai.io/ko?tab=ranking" target="_blank">링크</a></td>
+          </tr>
+
+          <tr>
+            <td class="col-num">3</td>
+            <td><span class="tag" style="background:#7c3aed;">Zeta AI</span></td>
+            <td class="col-name">트렌딩
+베스트
+신작
+전체 인기순</td>
+            <td class="col-desc">Zeta AI 인기 캐릭터 (텍스트 파싱)</td>
+            <td class="col-tags"></td>
+            <td><a href="https://zeta-ai.io/ko?tab=ranking" target="_blank">링크</a></td>
+          </tr>
+
+          <tr>
+            <td class="col-num">4</td>
+            <td><span class="tag" style="background:#7c3aed;">Zeta AI</span></td>
+            <td class="col-name">전체 인기순</td>
+            <td class="col-desc">Zeta AI 인기 캐릭터 (텍스트 파싱)</td>
+            <td class="col-tags"></td>
+            <td><a href="https://zeta-ai.io/ko?tab=ranking" target="_blank">링크</a></td>
+          </tr>
+
+          <tr>
+            <td class="col-num">5</td>
+            <td><span class="tag" style="background:#7c3aed;">Zeta AI</span></td>
+            <td class="col-name">1
+13.4만</td>
+            <td class="col-desc">Zeta AI 인기 캐릭터 (텍스트 파싱)</td>
+            <td class="col-tags"></td>
+            <td><a href="https://zeta-ai.io/ko?tab=ranking" target="_blank">링크</a></td>
+          </tr>
+
+          <tr>
+            <td class="col-num">6</td>
+            <td><span class="tag" style="background:#7c3aed;">Zeta AI</span></td>
+            <td class="col-name">13.4만</td>
+            <td class="col-desc">Zeta AI 인기 캐릭터 (텍스트 파싱)</td>
+            <td class="col-tags"></td>
+            <td><a href="https://zeta-ai.io/ko?tab=ranking" target="_blank">링크</a></td>
+          </tr>
+
+          <tr>
+            <td class="col-num">7</td>
+            <td><span class="tag" style="background:#7c3aed;">Zeta AI</span></td>
+            <td class="col-name">범해일</td>
+            <td class="col-desc">Zeta AI 인기 캐릭터 (텍스트 파싱)</td>
+            <td class="col-tags"></td>
+            <td><a href="https://zeta-ai.io/ko?tab=ranking" target="_blank">링크</a></td>
+          </tr>
+
+          <tr>
+            <td class="col-num">8</td>
+            <td><span class="tag" style="background:#7c3aed;">Zeta AI</span></td>
+            <td class="col-name">오메가인 당신을 혐오하는 우성 알파 남편.</td>
+            <td class="col-desc">Zeta AI 인기 캐릭터 (텍스트 파싱)</td>
+            <td class="col-tags"></td>
+            <td><a href="https://zeta-ai.io/ko?tab=ranking" target="_blank">링크</a></td>
+          </tr>
+
+          <tr>
+            <td class="col-num">9</td>
+            <td><span class="tag" style="background:#7c3aed;">Zeta AI</span></td>
+            <td class="col-name">2
+4.2만</td>
+            <td class="col-desc">Zeta AI 인기 캐릭터 (텍스트 파싱)</td>
+            <td class="col-tags"></td>
+            <td><a href="https://zeta-ai.io/ko?tab=ranking" target="_blank">링크</a></td>
+          </tr>
+
+          <tr>
+            <td class="col-num">10</td>
+            <td><span class="tag" style="background:#7c3aed;">Zeta AI</span></td>
+            <td class="col-name">4.2만</td>
+            <td class="col-desc">Zeta AI 인기 캐릭터 (텍스트 파싱)</td>
+            <td class="col-tags"></td>
+            <td><a href="https://zeta-ai.io/ko?tab=ranking" target="_blank">링크</a></td>
+          </tr>
+
+          <tr>
+            <td class="col-num">11</td>
+            <td><span class="tag" style="background:#7c3aed;">Zeta AI</span></td>
+            <td class="col-name">세이브 대학교, 피겨 학과</td>
+            <td class="col-desc">Zeta AI 인기 캐릭터 (텍스트 파싱)</td>
+            <td class="col-tags"></td>
+            <td><a href="https://zeta-ai.io/ko?tab=ranking" target="_blank">링크</a></td>
+          </tr>
+
+          <tr>
+            <td class="col-num">12</td>
+            <td><span class="tag" style="background:#7c3aed;">Zeta AI</span></td>
+            <td class="col-name">3
+29.5만</td>
+            <td class="col-desc">Zeta AI 인기 캐릭터 (텍스트 파싱)</td>
+            <td class="col-tags"></td>
+            <td><a href="https://zeta-ai.io/ko?tab=ranking" target="_blank">링크</a></td>
+          </tr>
+
+          <tr>
+            <td class="col-num">13</td>
+            <td><span class="tag" style="background:#7c3aed;">Zeta AI</span></td>
+            <td class="col-name">29.5만</td>
+            <td class="col-desc">Zeta AI 인기 캐릭터 (텍스트 파싱)</td>
+            <td class="col-tags"></td>
+            <td><a href="https://zeta-ai.io/ko?tab=ranking" target="_blank">링크</a></td>
+          </tr>
+
+          <tr>
+            <td class="col-num">14</td>
+            <td><span class="tag" style="background:#7c3aed;">Zeta AI</span></td>
+            <td class="col-name">한지혁</td>
+            <td class="col-desc">Zeta AI 인기 캐릭터 (텍스트 파싱)</td>
+            <td class="col-tags"></td>
+            <td><a href="https://zeta-ai.io/ko?tab=ranking" target="_blank">링크</a></td>
+          </tr>
+
+          <tr>
+            <td class="col-num">15</td>
+            <td><span class="tag" style="background:#7c3aed;">Zeta AI</span></td>
+            <td class="col-name">순진한 당신을 꼬시려는 문란한 경영학과 조교.</td>
+            <td class="col-desc">Zeta AI 인기 캐릭터 (텍스트 파싱)</td>
+            <td class="col-tags"></td>
+            <td><a href="https://zeta-ai.io/ko?tab=ranking" target="_blank">링크</a></td>
+          </tr>
+
+          <tr>
+            <td class="col-num">16</td>
+            <td><span class="tag" style="background:#7c3aed;">Zeta AI</span></td>
+            <td class="col-name">4
+12.8만</td>
+            <td class="col-desc">Zeta AI 인기 캐릭터 (텍스트 파싱)</td>
+            <td class="col-tags"></td>
+            <td><a href="https://zeta-ai.io/ko?tab=ranking" target="_blank">링크</a></td>
+          </tr>
+
+          <tr>
+            <td class="col-num">17</td>
+            <td><span class="tag" style="background:#7c3aed;">Zeta AI</span></td>
+            <td class="col-name">12.8만</td>
+            <td class="col-desc">Zeta AI 인기 캐릭터 (텍스트 파싱)</td>
+            <td class="col-tags"></td>
+            <td><a href="https://zeta-ai.io/ko?tab=ranking" target="_blank">링크</a></td>
+          </tr>
+
+          <tr>
+            <td class="col-num">18</td>
+            <td><span class="tag" style="background:#7c3aed;">Zeta AI</span></td>
+            <td class="col-name">블라인드 소개팅</td>
+            <td class="col-desc">Zeta AI 인기 캐릭터 (텍스트 파싱)</td>
+            <td class="col-tags"></td>
+            <td><a href="https://zeta-ai.io/ko?tab=ranking" target="_blank">링크</a></td>
+          </tr>
+
+          <tr>
+            <td class="col-num">19</td>
+            <td><span class="tag" style="background:#7c3aed;">Zeta AI</span></td>
+            <td class="col-name">그런데 나이가 조?금 많은 두명이 왔다</td>
+            <td class="col-desc">Zeta AI 인기 캐릭터 (텍스트 파싱)</td>
+            <td class="col-tags"></td>
+            <td><a href="https://zeta-ai.io/ko?tab=ranking" target="_blank">링크</a></td>
+          </tr>
+
+          <tr>
+            <td class="col-num">20</td>
+            <td><span class="tag" style="background:#7c3aed;">Zeta AI</span></td>
+            <td class="col-name">5
+61.3만</td>
+            <td class="col-desc">Zeta AI 인기 캐릭터 (텍스트 파싱)</td>
+            <td class="col-tags"></td>
+            <td><a href="https://zeta-ai.io/ko?tab=ranking" target="_blank">링크</a></td>
+          </tr>
+
+          <tr>
+            <td class="col-num">21</td>
+            <td><span class="tag" style="background:#dc2626;">Crack AI</span></td>
+            <td class="col-name">추천</td>
+            <td class="col-desc"></td>
+            <td class="col-tags"></td>
+            <td><a href="https://crack.wrtn.ai/characters/추천" target="_blank">링크</a></td>
+          </tr>
+
+          <tr>
+            <td class="col-num">22</td>
+            <td><span class="tag" style="background:#dc2626;">Crack AI</span></td>
+            <td class="col-name">신작 랭킹</td>
+            <td class="col-desc"></td>
+            <td class="col-tags"></td>
+            <td><a href="https://crack.wrtn.ai/characters/신작 랭킹" target="_blank">링크</a></td>
+          </tr>
+
+          <tr>
+            <td class="col-num">23</td>
+            <td><span class="tag" style="background:#dc2626;">Crack AI</span></td>
+            <td class="col-name">남성 인기</td>
+            <td class="col-desc"></td>
+            <td class="col-tags"></td>
+            <td><a href="https://crack.wrtn.ai/characters/남성 인기" target="_blank">링크</a></td>
+          </tr>
+
+          <tr>
+            <td class="col-num">24</td>
+            <td><span class="tag" style="background:#dc2626;">Crack AI</span></td>
+            <td class="col-name">여성 인기</td>
+            <td class="col-desc"></td>
+            <td class="col-tags"></td>
+            <td><a href="https://crack.wrtn.ai/characters/여성 인기" target="_blank">링크</a></td>
+          </tr>
+
+          <tr>
+            <td class="col-num">25</td>
+            <td><span class="tag" style="background:#dc2626;">Crack AI</span></td>
+            <td class="col-name">2차 창작</td>
+            <td class="col-desc"></td>
+            <td class="col-tags"></td>
+            <td><a href="https://crack.wrtn.ai/characters/2차 창작" target="_blank">링크</a></td>
+          </tr>
+
+          <tr>
+            <td class="col-num">26</td>
+            <td><span class="tag" style="background:#dc2626;">Crack AI</span></td>
+            <td class="col-name">윤태진</td>
+            <td class="col-desc">내가 널 버리고 도망쳤기에, 네가 이렇게 망가졌다.</td>
+            <td class="col-tags">#피폐, #구원, #순애</td>
+            <td><a href="https://crack.wrtn.ai/characters/69c35900c803b4297f5b2be2" target="_blank">링크</a></td>
+          </tr>
+
+          <tr>
+            <td class="col-num">27</td>
+            <td><span class="tag" style="background:#dc2626;">Crack AI</span></td>
+            <td class="col-name">소꿉친구 이노아</td>
+            <td class="col-desc">"내..내가 너를 좋아할리 없잖아!....이 바보야!"</td>
+            <td class="col-tags">#연애, #소꿉친구, #로맨스</td>
+            <td><a href="https://crack.wrtn.ai/characters/69c35900c803b4297f5b2be8" target="_blank">링크</a></td>
+          </tr>
+
+          <tr>
+            <td class="col-num">28</td>
+            <td><span class="tag" style="background:#dc2626;">Crack AI</span></td>
+            <td class="col-name">루시안</td>
+            <td class="col-desc">천사인 당신을 쫒아 다니며 매일 고백하는 마왕</td>
+            <td class="col-tags">#마왕, #인외, #고백공격</td>
+            <td><a href="https://crack.wrtn.ai/characters/69c35900c803b4297f5b2be6" target="_blank">링크</a></td>
+          </tr>
+
+          <tr>
+            <td class="col-num">29</td>
+            <td><span class="tag" style="background:#dc2626;">Crack AI</span></td>
+            <td class="col-name">송백화</td>
+            <td class="col-desc">선배를 괴롭히지만 사실 좋아하는 건방진 후배</td>
+            <td class="col-tags">#순애, #로맨스, #매스가키</td>
+            <td><a href="https://crack.wrtn.ai/characters/69c35900c803b4297f5b2be4" target="_blank">링크</a></td>
+          </tr>
+
+          <tr>
+            <td class="col-num">30</td>
+            <td><span class="tag" style="background:#dc2626;">Crack AI</span></td>
+            <td class="col-name">루시엘</td>
+            <td class="col-desc">개싸가지 대공</td>
+            <td class="col-tags">#로판, #경멸, #대공</td>
+            <td><a href="https://crack.wrtn.ai/characters/69c35900c803b4297f5b2bec" target="_blank">링크</a></td>
+          </tr>
+
+          <tr>
+            <td class="col-num">31</td>
+            <td><span class="tag" style="background:#dc2626;">Crack AI</span></td>
+            <td class="col-name">블랑카</td>
+            <td class="col-desc">마왕의 딸 성에 잡혀왔는데 마왕의 딸이 자꾸 잘해준다?</td>
+            <td class="col-tags">#로맨스, #판타지, #마법</td>
+            <td><a href="https://crack.wrtn.ai/characters/69c35900c803b4297f5b2bea" target="_blank">링크</a></td>
+          </tr>
+
+          <tr>
+            <td class="col-num">32</td>
+            <td><span class="tag" style="background:#dc2626;">Crack AI</span></td>
+            <td class="col-name">캐릭터 모아보기</td>
+            <td class="col-desc"></td>
+            <td class="col-tags"></td>
+            <td><a href="https://crack.wrtn.ai/characters/68dafa908af4482c282fc055" target="_blank">링크</a></td>
+          </tr>
+
+          <tr>
+            <td class="col-num">33</td>
+            <td><span class="tag" style="background:#dc2626;">Crack AI</span></td>
+            <td class="col-name">contents-fe-story-associated-characters</td>
+            <td class="col-desc"></td>
+            <td class="col-tags"></td>
+            <td><a href="https://crack.wrtn.ai/characters/contents-fe-story-associated-characters" target="_blank">링크</a></td>
+          </tr>
+
+          <tr>
+            <td class="col-num">34</td>
+            <td><span class="tag" style="background:#dc2626;">Crack AI</span></td>
+            <td class="col-name">contents-server-party-chat-gemini-request-path</td>
+            <td class="col-desc"></td>
+            <td class="col-tags"></td>
+            <td><a href="https://crack.wrtn.ai/characters/contents-server-party-chat-gemini-request-path" target="_blank">링크</a></td>
+          </tr>
+
+          <tr>
+            <td class="col-num">35</td>
+            <td><span class="tag" style="background:#dc2626;">Crack AI</span></td>
+            <td class="col-name">contents-fe-arpg-config</td>
+            <td class="col-desc"></td>
+            <td class="col-tags"></td>
+            <td><a href="https://crack.wrtn.ai/characters/contents-fe-arpg-config" target="_blank">링크</a></td>
+          </tr>
+
+          <tr>
+            <td class="col-num">36</td>
+            <td><span class="tag" style="background:#dc2626;">Crack AI</span></td>
+            <td class="col-name">contents-fe-history-summary</td>
+            <td class="col-desc"></td>
+            <td class="col-tags"></td>
+            <td><a href="https://crack.wrtn.ai/characters/contents-fe-history-summary" target="_blank">링크</a></td>
+          </tr>
+
+          <tr>
+            <td class="col-num">37</td>
+            <td><span class="tag" style="background:#dc2626;">Crack AI</span></td>
+            <td class="col-name">contents-fe-chat-summary-edit</td>
+            <td class="col-desc"></td>
+            <td class="col-tags"></td>
+            <td><a href="https://crack.wrtn.ai/characters/contents-fe-chat-summary-edit" target="_blank">링크</a></td>
+          </tr>
+
+          <tr>
+            <td class="col-num">38</td>
+            <td><span class="tag" style="background:#dc2626;">Crack AI</span></td>
+            <td class="col-name">contents-web-situation-image-text</td>
+            <td class="col-desc"></td>
+            <td class="col-tags"></td>
+            <td><a href="https://crack.wrtn.ai/characters/contents-web-situation-image-text" target="_blank">링크</a></td>
+          </tr>
+
+          <tr>
+            <td class="col-num">39</td>
+            <td><span class="tag" style="background:#dc2626;">Crack AI</span></td>
+            <td class="col-name">contents-web-new-event-server</td>
+            <td class="col-desc"></td>
+            <td class="col-tags"></td>
+            <td><a href="https://crack.wrtn.ai/characters/contents-web-new-event-server" target="_blank">링크</a></td>
+          </tr>
+
+          <tr>
+            <td class="col-num">40</td>
+            <td><span class="tag" style="background:#dc2626;">Crack AI</span></td>
+            <td class="col-name">contents-web-feed</td>
+            <td class="col-desc"></td>
+            <td class="col-tags"></td>
+            <td><a href="https://crack.wrtn.ai/characters/contents-web-feed" target="_blank">링크</a></td>
+          </tr>
+
+          <tr>
+            <td class="col-num">41</td>
+            <td><span class="tag" style="background:#6b7280;">rofan</span></td>
+            <td class="col-name">캐릭터 AI 채팅 | 로판 AI</td>
+            <td class="col-desc">AI 캐릭터와 함께하는 두근두근 로맨스 채팅. 내가 직접 만든 인공지능 AI 캐릭터와 은밀한 대화를 시작해보세요. 캐릭터 AI로 만나는 일상, ...</td>
+            <td class="col-tags"></td>
+            <td><a href="https://rofan.ai/character/rofan_0" target="_blank">링크</a></td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+  </section>
+</main>
+
+<footer>
+  UNX Character Tracker &nbsp;·&nbsp; 생성: 2026-03-31 11:56:46
+</footer>
+
+</body>
+</html>

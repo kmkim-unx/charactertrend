@@ -1,0 +1,41 @@
+name: Daily Character Tracker
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # 매일 UTC 00:00 (KST 09:00)
+  workflow_dispatch:  # 수동 실행 가능
+
+jobs:
+  run-tracker:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+        python -m playwright install chromium --with-deps
+
+    - name: Run tracker pipeline
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
+        NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+      run: |
+        python3 run_pipeline.py --sources rofan,crack,zeta --no-notion
+
+    - name: Commit and push data
+      run: |
+        git config user.name "UNX Tracker Bot"
+        git config user.email "bot@unx.ai"
+        git add public/data/
+        git diff --staged --quiet || git commit -m "chore: daily tracker update $(date -u +%Y-%m-%d)"
+        git push

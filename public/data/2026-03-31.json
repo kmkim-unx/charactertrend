@@ -1,0 +1,99 @@
+{
+  "generated_at": "2026-03-31T11:56:46.253211",
+  "total_scraped": 41,
+  "sources_used": [
+    "rofan",
+    "crack",
+    "zeta"
+  ],
+  "top_k": [
+    {
+      "name": "4\n12.8만",
+      "source": "zeta",
+      "description": "Zeta AI 인기 캐릭터 (텍스트 파싱)",
+      "tags": [],
+      "interaction_count": 0,
+      "url": "https://zeta-ai.io/ko?tab=ranking",
+      "image_url": "https://image.zeta-ai.io/og-image-ko.png",
+      "g3": 6,
+      "g4": 8,
+      "g5": 7,
+      "total": 21,
+      "reason": "이 캐릭터는 AI 기반의 인기 캐릭터로, 대중이 쉽게 이해할 수 있는 요소가 있지만 기존 캐릭터와의 차별성이 필요합니다. 신선한 존재 형태와 독특한 조합이 매력적이며, 장기적인 서사 가능성도 존재합니다.",
+      "unx_fit": "AI 기반의 캐릭터로서 UNX 라이브 AI의 특성과 잘 어울립니다."
+    },
+    {
+      "name": "루시안",
+      "source": "crack",
+      "description": "천사인 당신을 쫒아 다니며 매일 고백하는 마왕",
+      "tags": [
+        "#마왕",
+        "#인외",
+        "#고백공격"
+      ],
+      "interaction_count": 0,
+      "url": "https://crack.wrtn.ai/characters/69c35900c803b4297f5b2be6",
+      "image_url": "https://wrtn-image-ai-character.s3.ap-northeast-2.amazonaws.com/8OEVXcBGLao-APKONU5PUjMz/bf5b145a-fe13-4441-a3d5-81586afd39fa_origin.webp",
+      "g3": 7,
+      "g4": 8,
+      "g5": 6,
+      "total": 21,
+      "reason": "루시안은 마왕과 천사라는 익숙한 캐릭터 조합을 통해 대중이 쉽게 이해할 수 있는 요소를 가지고 있습니다. 그러나 마왕이 천사를 쫓아다니며 고백하는 설정은 신선한 차별점을 제공합니다. 장기적인 매력은 다소 부족할 수 있지만, 독특한 세계관이 팬을 끌어들일 가능성이 있습니다.",
+      "unx_fit": "루시안은 독특한 캐릭터 설정으로 UNX 라이브 AI에 적합하여 다양한 상호작용을 통해 팬들과의 관계를 강화할 수 있습니다."
+    },
+    {
+      "name": "캐릭터 AI 채팅 | 로판 AI",
+      "source": "rofan",
+      "description": "AI 캐릭터와 함께하는 두근두근 로맨스 채팅. 내가 직접 만든 인공지능 AI 캐릭터와 은밀한 대화를 시작해보세요. 캐릭터 AI로 만나는 일상, 판타지 속 감성 로맨스, AI 대화 사이트 Rofan AI.",
+      "tags": [],
+      "interaction_count": 0,
+      "url": "https://rofan.ai/character/rofan_0",
+      "image_url": "",
+      "g3": 8,
+      "g4": 7,
+      "g5": 6,
+      "total": 21,
+      "reason": "기존의 로맨스 장르와 감정선을 잘 참조하여 대중이 쉽게 이해할 수 있는 요소가 많습니다. 그러나 AI 캐릭터와의 대화라는 신선한 접근 방식이 있지만, 물리적으로 불가능한 존재 형태는 부족합니다. 장기적인 매력은 있지만, 특정 트렌드에 의존할 가능성이 있습니다.",
+      "unx_fit": "AI 캐릭터와의 대화는 UNX 라이브 AI의 인터랙티브한 특성과 잘 맞아떨어집니다."
+    },
+    {
+      "name": "윤태진",
+      "source": "crack",
+      "description": "내가 널 버리고 도망쳤기에, 네가 이렇게 망가졌다.",
+      "tags": [
+        "#피폐",
+        "#구원",
+        "#순애"
+      ],
+      "interaction_count": 0,
+      "url": "https://crack.wrtn.ai/characters/69c35900c803b4297f5b2be2",
+      "image_url": "https://wrtn-image-ai-character.s3.ap-northeast-2.amazonaws.com/8KvX5e7eqHK-KKKOS1A4QjdP/e62488ac-c28a-4fa2-b68f-cb018d4b6c37_origin.webp",
+      "g3": 7,
+      "g4": 6,
+      "g5": 8,
+      "total": 21,
+      "reason": "윤태진은 피폐와 구원이라는 감정선을 통해 대중이 쉽게 이해할 수 있는 요소를 가지고 있습니다. 그러나 물리적으로 불가능한 존재 형태나 AI만 가능한 조합은 부족해 신선함이 다소 떨어집니다. 그럼에도 불구하고 장기적인 매력과 서사를 갖추고 있어 팬층을 형성할 가능성이 높습니다.",
+      "unx_fit": "윤태진은 감정적으로 깊이 있는 캐릭터로, UNX 라이브 AI의 감정 표현과 상호작용에 적합합니다."
+    },
+    {
+      "name": "송백화",
+      "source": "crack",
+      "description": "선배를 괴롭히지만 사실 좋아하는 건방진 후배",
+      "tags": [
+        "#순애",
+        "#로맨스",
+        "#매스가키"
+      ],
+      "interaction_count": 0,
+      "url": "https://crack.wrtn.ai/characters/69c35900c803b4297f5b2be4",
+      "image_url": "https://wrtn-image-ai-character.s3.ap-northeast-2.amazonaws.com/8Ouvi5by5kk-KKKOUkFXWjhQ/28aba775-a5fc-4640-a447-98857c3ba785_origin.webp",
+      "g3": 7,
+      "g4": 6,
+      "g5": 8,
+      "total": 21,
+      "reason": "송백화는 로맨스 장르에서 흔히 볼 수 있는 '짝사랑'의 감정선을 가지고 있어 대중이 쉽게 이해할 수 있습니다. 그러나 '선배를 괴롭히는 후배'라는 설정은 다소 신선한 요소를 제공하며, 장기적인 서사와 매력을 갖추고 있습니다.",
+      "unx_fit": "이 캐릭터는 UNX 라이브 AI의 상호작용에 적합한 매력적인 요소를 가지고 있습니다."
+    }
+  ],
+  "archive_success": true
+}

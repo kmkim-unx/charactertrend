@@ -25,3 +25,10 @@ PyYAML>=6.0                 # YAML 설정 파일 파싱
 # pyvirtualcam              # OBS 가상 카메라 출력 (config에서 virtual_cam: true 시)
 # TikTokLive               # TikTok Live 채팅 연동 (--tiktok 옵션 시)
 # pydub                    # MP3 디코딩 대안 (soundfile 실패 시)
+
+# ── UNX Character Tracker ────────────────────
+requests>=2.31.0            # HTTP 요청
+beautifulsoup4>=4.12.0      # HTML 파싱
+python-dotenv>=1.0.0        # .env 파일 로드
+playwright>=1.40.0          # 브라우저 자동화 (JS 렌더링 스크래핑)
+PyYAML>=6.0                 # YAML 설정 파일 파싱

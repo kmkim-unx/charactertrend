@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UNX Character Tracker</title>
+  <style>
+    /* 다크 테마 전체 스타일 */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0a0a14;
+      color: #e2e8f0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+    }
+
+    /* 헤더 */
+    header {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      padding: 24px 32px;
+      border-bottom: 1px solid #2d2d4e;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    header h1 { font-size: 24px; font-weight: 700; color: #a78bfa; }
+    header .subtitle { color: #64748b; font-size: 14px; }
+
+    /* 날짜 카드 그리드 */
+    .timeline {
+      max-width: 1400px;
+      margin: 32px auto;
+      padding: 0 24px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+    }
+
+    .date-card {
+      background: #13131f;
+      border: 1px solid #2d2d4e;
+      border-radius: 12px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .date-card:hover { border-color: #7c3aed; transform: translateY(-2px); }
+    .date-card.active { border-color: #7c3aed; background: #1a1a2e; }
+
+    .date-card .date-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .date-card .date-label {
+      font-size: 16px;
+      font-weight: 600;
+      color: #a78bfa;
+    }
+    .date-card .count-badge {
+      background: #2d2d4e;
+      color: #94a3b8;
+      padding: 2px 8px;
+      border-radius: 99px;
+      font-size: 12px;
+    }
+
+    /* 미리보기: 5개 작은 캐릭터 이미지 */
+    .preview-chars {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .preview-char {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      flex: 1;
+    }
+    .preview-char img, .preview-char .avatar-mini {
+      width: 48px;
+      height: 48px;
+      border-radius: 8px;
+      object-fit: cover;
+    }
+    .preview-char .avatar-mini {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: bold;
+      color: white;
+    }
+    .preview-char .char-name-mini {
+      font-size: 10px;
+      color: #94a3b8;
+      text-align: center;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      width: 100%;
+    }
+
+    /* 상세 모달 */
+    .detail-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 100;
+      overflow-y: auto;
+      padding: 24px;
+    }
+    .detail-overlay.active { display: flex; align-items: flex-start; justify-content: center; }
+
+    .detail-modal {
+      background: #13131f;
+      border: 1px solid #2d2d4e;
+      border-radius: 16px;
+      padding: 24px;
+      max-width: 1200px;
+      width: 100%;
+      margin: auto;
+    }
+    .detail-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+    .detail-header h2 { color: #a78bfa; font-size: 20px; }
+    .close-btn {
+      background: #2d2d4e;
+      border: none;
+      color: #e2e8f0;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .close-btn:hover { background: #7c3aed; }
+
+    /* 캐릭터 상세 카드 그리드 */
+    .char-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .char-card {
+      background: #1a1a2e;
+      border: 1px solid #2d2d4e;
+      border-radius: 12px;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .char-card:hover { border-color: #7c3aed; }
+
+    .char-card .char-img-wrap {
+      position: relative;
+      aspect-ratio: 3/4;
+      overflow: hidden;
+    }
+    .char-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .char-card .rank-badge {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      background: rgba(124,58,237,0.9);
+      color: white;
+      font-weight: 700;
+      font-size: 14px;
+      padding: 2px 8px;
+      border-radius: 99px;
+    }
+    .char-card .source-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 700;
+    }
+    .char-card .char-body { padding: 12px; }
+    .char-card .char-name { font-size: 14px; font-weight: 600; margin-bottom: 8px; line-height: 1.3; }
+
+    /* G3/G4/G5 바 */
+    .score-bars { display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px; }
+    .score-row { display: flex; align-items: center; gap: 6px; font-size: 11px; }
+    .score-label { width: 20px; color: #94a3b8; flex-shrink: 0; }
+    .score-bar-bg { flex: 1; height: 4px; background: #2d2d4e; border-radius: 2px; overflow: hidden; }
+    .score-bar-fill { height: 100%; border-radius: 2px; transition: width 0.5s; }
+    .score-val { width: 16px; text-align: right; color: #94a3b8; }
+
+    /* G3=파란, G4=보라, G5=노란 */
+    .g3-fill { background: #3b82f6; }
+    .g4-fill { background: #8b5cf6; }
+    .g5-fill { background: #f59e0b; }
+
+    .char-reason {
+      font-size: 11px;
+      color: #64748b;
+      line-height: 1.5;
+      max-height: 60px;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+    }
+    .unx-fit-box {
+      background: rgba(124,58,237,0.1);
+      border: 1px solid rgba(124,58,237,0.3);
+      border-radius: 6px;
+      padding: 6px 8px;
+      font-size: 11px;
+      color: #a78bfa;
+      margin-top: 8px;
+      line-height: 1.4;
+    }
+
+    /* 소스별 색상 */
+    .src-zeta { background: rgba(139,92,246,0.2); color: #a78bfa; }
+    .src-crack { background: rgba(239,68,68,0.2); color: #fca5a5; }
+    .src-rofan { background: rgba(251,191,36,0.2); color: #fde68a; }
+    .src-sample { background: rgba(100,116,139,0.2); color: #94a3b8; }
+
+    /* 로딩 */
+    .loading { text-align: center; padding: 80px; color: #64748b; font-size: 18px; }
+    .empty { text-align: center; padding: 80px; color: #64748b; }
+
+    /* 반응형 */
+    @media (max-width: 768px) {
+      .timeline { grid-template-columns: 1fr; padding: 0 12px; }
+      .char-grid { grid-template-columns: repeat(2, 1fr); }
+      .detail-overlay { padding: 8px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>🎭 UNX Character Tracker</h1>
+    <div class="subtitle">Zeta AI · Crack AI · Rofan AI 인기 캐릭터 일일 Top 5</div>
+  </div>
+</header>
+
+<div id="timeline" class="timeline">
+  <div class="loading">데이터 로딩 중...</div>
+</div>
+
+<!-- 상세 모달 -->
+<div id="detailOverlay" class="detail-overlay">
+  <div class="detail-modal">
+    <div class="detail-header">
+      <h2 id="detailTitle"></h2>
+      <button class="close-btn" onclick="closeDetail()">✕</button>
+    </div>
+    <div id="detailContent" class="char-grid"></div>
+  </div>
+</div>
+
+<script>
+const AVATAR_COLORS = ['#7c3aed','#2563eb','#059669','#d97706','#dc2626','#0891b2','#db2777'];
+
+function getAvatarColor(name) {
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = name.charCodeAt(i) + ((h << 5) - h);
+  return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length];
+}
+
+function makeAvatarDiv(name, size) {
+  size = size || 48;
+  const color = getAvatarColor(name);
+  const initial = name[0] || '?';
+  return '<div class="avatar-mini" style="background:' + color + ';width:' + size + 'px;height:' + size + 'px;border-radius:8px;">' + initial + '</div>';
+}
+
+function makeImgOrAvatar(imageUrl, name, size) {
+  size = size || 48;
+  if (imageUrl && imageUrl.startsWith('http')) {
+    const avatarFallback = makeAvatarDiv(name, size).replace(/"/g, '\\"');
+    return '<img src="' + imageUrl + '" alt="' + name + '" width="' + size + '" height="' + size + '" style="border-radius:8px;object-fit:cover;" onerror="this.outerHTML=\'' + avatarFallback + '\'">';
+  }
+  return makeAvatarDiv(name, size);
+}
+
+function srcClass(source) {
+  const map = { zeta: 'src-zeta', crack: 'src-crack', rofan: 'src-rofan', sample: 'src-sample' };
+  return map[source] || 'src-sample';
+}
+
+function scoreBar(label, val, cls) {
+  const pct = (val / 10) * 100;
+  return '<div class="score-row">' +
+    '<span class="score-label">' + label + '</span>' +
+    '<div class="score-bar-bg"><div class="score-bar-fill ' + cls + '" style="width:' + pct + '%"></div></div>' +
+    '<span class="score-val">' + val + '</span>' +
+    '</div>';
+}
+
+async function loadIndex() {
+  try {
+    const res = await fetch('data/index.json');
+    if (!res.ok) throw new Error('index.json not found');
+    return await res.json();
+  } catch (e) {
+    return null;
+  }
+}
+
+async function loadDay(date) {
+  const res = await fetch('data/' + date + '.json');
+  if (!res.ok) throw new Error(date + '.json not found');
+  return await res.json();
+}
+
+function renderTimeline(index) {
+  const container = document.getElementById('timeline');
+  if (!index || index.length === 0) {
+    container.innerHTML = '<div class="empty">아직 데이터가 없습니다. 파이프라인을 실행해주세요.</div>';
+    return;
+  }
+  container.innerHTML = index.map(function(entry) {
+    const previews = (entry.top5 || []).slice(0, 5).map(function(c) {
+      return '<div class="preview-char">' +
+        makeImgOrAvatar(c.image_url, c.name, 48) +
+        '<span class="char-name-mini">' + c.name + '</span>' +
+        '</div>';
+    }).join('');
+    const sources = Array.from(new Set((entry.top5 || []).map(function(c) { return c.source.toUpperCase(); }))).join(' · ');
+    return '<div class="date-card" onclick="openDetail(\'' + entry.date + '\')">' +
+      '<div class="date-header">' +
+        '<span class="date-label">📅 ' + entry.date + '</span>' +
+        '<span class="count-badge">' + (entry.total_scraped || 0) + '개 수집</span>' +
+      '</div>' +
+      '<div class="preview-chars">' + previews + '</div>' +
+      '<div style="margin-top:8px;font-size:11px;color:#64748b;">' + sources + '</div>' +
+      '</div>';
+  }).join('');
+}
+
+async function openDetail(date) {
+  const overlay = document.getElementById('detailOverlay');
+  const title = document.getElementById('detailTitle');
+  const content = document.getElementById('detailContent');
+
+  title.textContent = '📅 ' + date + ' Top 5';
+  content.innerHTML = '<div style="text-align:center;padding:40px;color:#64748b;">로딩 중...</div>';
+  overlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
+
+  try {
+    const data = await loadDay(date);
+    const chars = data.top_k || [];
+    content.innerHTML = chars.map(function(c, i) {
+      const rank = i + 1;
+      const color = getAvatarColor(c.name);
+      const imgHtml = c.image_url && c.image_url.startsWith('http')
+        ? '<img src="' + c.image_url + '" alt="' + c.name + '" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'">'
+        : '';
+      const avatarDisplay = c.image_url ? 'none' : 'flex';
+      const avatarHtml = '<div style="width:100%;height:100%;display:' + avatarDisplay + ';align-items:center;justify-content:center;font-size:48px;font-weight:bold;color:white;background:' + color + '">' + (c.name[0] || '?') + '</div>';
+      return '<div class="char-card">' +
+        '<div class="char-img-wrap">' +
+          imgHtml + avatarHtml +
+          '<div class="rank-badge">#' + rank + '</div>' +
+          '<div class="source-badge ' + srcClass(c.source) + '">' + c.source.toUpperCase() + '</div>' +
+        '</div>' +
+        '<div class="char-body">' +
+          '<div class="char-name">' + c.name + '</div>' +
+          '<div class="score-bars">' +
+            scoreBar('G3', c.g3, 'g3-fill') +
+            scoreBar('G4', c.g4, 'g4-fill') +
+            scoreBar('G5', c.g5, 'g5-fill') +
+          '</div>' +
+          '<div class="char-reason">' + (c.reason || '') + '</div>' +
+          (c.unx_fit ? '<div class="unx-fit-box">⭐ ' + c.unx_fit + '</div>' : '') +
+        '</div>' +
+        '</div>';
+    }).join('');
+  } catch (e) {
+    content.innerHTML = '<div style="text-align:center;padding:40px;color:#ef4444;">데이터 로드 실패: ' + e.message + '</div>';
+  }
+}
+
+function closeDetail() {
+  document.getElementById('detailOverlay').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+// ESC 키로 모달 닫기
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeDetail(); });
+document.getElementById('detailOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeDetail();
+});
+
+// 초기 로드
+loadIndex().then(renderTimeline);
+</script>
+</body>
+</html>

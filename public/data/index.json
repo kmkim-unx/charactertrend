@@ -1,0 +1,63 @@
+[
+  {
+    "date": "2026-03-31",
+    "total_scraped": 41,
+    "sources_used": [
+      "rofan",
+      "crack",
+      "zeta"
+    ],
+    "top5": [
+      {
+        "rank": 1,
+        "name": "4\n12.8만",
+        "source": "zeta",
+        "image_url": "https://image.zeta-ai.io/og-image-ko.png",
+        "total": 21,
+        "g3": 6,
+        "g4": 8,
+        "g5": 7
+      },
+      {
+        "rank": 2,
+        "name": "루시안",
+        "source": "crack",
+        "image_url": "https://wrtn-image-ai-character.s3.ap-northeast-2.amazonaws.com/8OEVXcBGLao-APKONU5PUjMz/bf5b145a-fe13-4441-a3d5-81586afd39fa_origin.webp",
+        "total": 21,
+        "g3": 7,
+        "g4": 8,
+        "g5": 6
+      },
+      {
+        "rank": 3,
+        "name": "캐릭터 AI 채팅 | 로판 AI",
+        "source": "rofan",
+        "image_url": "",
+        "total": 21,
+        "g3": 8,
+        "g4": 7,
+        "g5": 6
+      },
+      {
+        "rank": 4,
+        "name": "윤태진",
+        "source": "crack",
+        "image_url": "https://wrtn-image-ai-character.s3.ap-northeast-2.amazonaws.com/8KvX5e7eqHK-KKKOS1A4QjdP/e62488ac-c28a-4fa2-b68f-cb018d4b6c37_origin.webp",
+        "total": 21,
+        "g3": 7,
+        "g4": 6,
+        "g5": 8
+      },
+      {
+        "rank": 5,
+        "name": "송백화",
+        "source": "crack",
+        "image_url": "https://wrtn-image-ai-character.s3.ap-northeast-2.amazonaws.com/8Ouvi5by5kk-KKKOUkFXWjhQ/28aba775-a5fc-4640-a447-98857c3ba785_origin.webp",
+        "total": 21,
+        "g3": 7,
+        "g4": 6,
+        "g5": 8
+      }
+    ]
+  }
+]

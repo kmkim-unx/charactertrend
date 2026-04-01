@@ -5,7 +5,13 @@ __pycache__/
 .env
 *.mp4
 *.npz
-*.json
+output/*.json
 !.env.example
+!web/package.json
+!web/tsconfig.json
+!web/next.config.js
+!web/tailwind.config.js
+!web/postcss.config.js
+!vercel.json
 MotionPNGTuber/
 assets/character/*.mp4
