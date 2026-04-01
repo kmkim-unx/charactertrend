@@ -1,0 +1,18 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Next.js Dashboard (web)",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "cwd": "web",
+      "port": 3000
+    },
+    {
+      "name": "HTML Dashboard Server",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["serve.py", "--port", "8080", "--no-open"],
+      "port": 8080
+    }
+  ]
+}

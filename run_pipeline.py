@@ -286,62 +286,25 @@ def main() -> int:
     )
     logger.info(f"\n결과 저장: {cfg.result_file}")
 
-    # 날짜별 히스토리 저장
-    from datetime import date
-    date_str = date.today().isoformat()
-    history_dir = Path("public/data")
-    history_dir.mkdir(parents=True, exist_ok=True)
-
-    dated_file = history_dir / f"{date_str}.json"
-    dated_file.write_text(
-        json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
-
-    # index.json 업데이트
-    index_file = history_dir / "index.json"
-    index_data: list = []
-    if index_file.exists():
-        try:
-            index_data = json.loads(index_file.read_text(encoding="utf-8"))
-        except Exception:
-            index_data = []
-
-    # 오늘 항목 업데이트 or 추가
-    today_entry = {
+    # ── 날짜별 히스토리 저장 ─────────────────────────────────
+    from tracker.reporter import save_date_data
+    date_str = datetime.now().strftime("%Y-%m-%d")
+    run_meta_full = {
         "date": date_str,
-        "total_scraped": result["total_scraped"],
-        "sources_used": result["sources_used"],
-        "top5": [
-            {
-                "rank": i + 1,
-                "name": c["name"],
-                "source": c["source"],
-                "image_url": c["image_url"],
-                "total": c["total"],
-                "g3": c["g3"],
-                "g4": c["g4"],
-                "g5": c["g5"],
-            }
-            for i, c in enumerate(result["top_k"])
-        ],
+        "generated_at": result["generated_at"],
+        "sources_used": enabled_sources,
     }
-    # 기존 오늘 항목 교체 또는 새로 추가
-    index_data = [e for e in index_data if e.get("date") != date_str]
-    index_data.insert(0, today_entry)  # 최신 날짜가 맨 앞
-    index_file.write_text(
-        json.dumps(index_data, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
-    logger.info(f"히스토리 저장: {dated_file}")
+    try:
+        date_path = save_date_data(top_k, characters, cfg, run_meta_full)
+        logger.info(f"히스토리 저장: {date_path}")
+    except Exception as e:
+        logger.warning(f"날짜 데이터 저장 실패 (계속 진행): {e}")
 
     # ── Step 4: HTML 대시보드 생성 ───────────────────────────
     logger.info(f"\n[Step 4] HTML 대시보드 생성")
     try:
         from tracker.reporter import generate_html
-        run_meta = {
-            "generated_at": result["generated_at"],
-            "sources_used": enabled_sources,
-        }
-        generate_html(top_k, characters, cfg, run_meta)
+        generate_html(top_k, characters, cfg, run_meta_full)
         dashboard_path = Path(cfg.output_dir) / "dashboard.html"
         logger.info(f"Dashboard: {dashboard_path} ({dashboard_path.stat().st_size:,} bytes)")
     except Exception as e:
